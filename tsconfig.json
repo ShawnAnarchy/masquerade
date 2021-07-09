@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "baseUrl": "",
+    "paths": {
+      "circuits/*": [ "circuits/*" ]
+    }
+  }
+}

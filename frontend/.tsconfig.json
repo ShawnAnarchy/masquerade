@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "baseUrl": "",
+    "lib": ["es5", "dom"],
+    "target": "es6",
+    "module": "ES2015",
+    "skipLibCheck": true,
+    "typeRoots" : ["../types"],
+    "types":[]
+  },
+  "exclude": [
+    "../test/**/*.ts",
+    "../node_modules/**/*.ts"
+  ]
+}

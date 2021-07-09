@@ -1,0 +1,65 @@
+#./clean.sh
+
+goMasqueradeInput='{
+      "identifiedAddress": 0,
+      "identifiedPathElements": [0,0,0,0,0,0,0],
+      "identifiedPathIndices": [0,0,0,0,0,0,0],
+      "identfiedRoot": 0,
+      "stealthAddress": 0,
+      "entryPathElements": [0,0,0,0,0,0,0],
+      "entryPathIndices": [0,0,0,0,0,0,0],
+      "entryRoot": 0,
+      "relayer": 0,
+      "fee": 0,
+      "checksum": 0
+}';
+
+target="$1"
+
+case "$target" in
+  sample)           input='{ "a": 109, "b": 203, "c": 231 }';;
+  goMasquerade)      input="$goMasqueradeInput" ;;
+  verifyMasqueraded) input='{}' ;;
+  *) echo "target=$target is not matched." && exit 1 ;;
+esac
+
+cp $target.circom circuit.circom
+
+echo 'generate input.json'
+echo "$input" > input.json
+
+echo "npx circom circuit.circom --r1cs"
+npx circom circuit.circom --r1cs
+echo "npx circom circuit.circom --wasm"
+npx circom circuit.circom --wasm
+echo "npx circom circuit.circom --sym"
+npx circom circuit.circom --sym
+
+echo 'npx snarkjs info -r circuit.r1cs'
+npx snarkjs info -r circuit.r1cs
+
+echo "npx snarkjs setup -r circuit.r1cs"
+npx snarkjs setup -r circuit.r1cs
+
+echo 'npx snarkjs calculatewitness --wasm circuit.wasm --input input.json'
+npx snarkjs calculatewitness --wasm circuit.wasm --input input.json
+
+echo 'npx snarkjs proof'
+time npx snarkjs proof --verbose
+# mv proof.json _proof.json
+# npx snarkjs proof --verbose
+
+echo 'npx snarkjs verify'
+npx snarkjs verify
+
+echo 'npx snarkjs generateverifier'
+npx snarkjs generateverifier --verifier Verifier.sol
+
+echo 'npx snarkjs generatecall'
+echo '[' > calldata.json
+npx snarkjs generatecall >> calldata.json
+echo ']' >> calldata.json
+
+echo 'move Verifier.sol and calldata'
+cp ./Verifier.sol ../contracts
+cp ./calldata.json ../test
